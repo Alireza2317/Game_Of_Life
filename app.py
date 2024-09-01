@@ -6,7 +6,7 @@ from copy import deepcopy
 W: int = 20
 H: int = 20
 
-FPS = 10
+FPS = 60
 
 CELL_SIZE = 35
 
@@ -95,12 +95,23 @@ class GameOfLife:
 
 
 	def evolve(self) -> None:
+		# compute alive nearby cells for every cell in the current state of the world
 		self.compute_num_alives()
 
+		# loop through each cell in the world, and the num_alives list
 		for r in range(self.height):
 			for c in range(self.width):
-				pass
-
+				cell = self.world[r][c]
+				num_alives = self.num_alives[r][c]
+				# it's time to check for the main rules of the game
+				if cell.state and num_alives < 2:
+					cell.state = False
+				elif cell.state and num_alives in (2, 3):
+					cell.state = True
+				elif cell.state and num_alives > 3:
+					cell.state = False
+				elif (not cell.state) and num_alives == 3:
+					cell.state = True
 
 
 
