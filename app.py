@@ -1,55 +1,21 @@
 import sys
 import pygame as pg
 from random import random
-from copy import deepcopy
 
-W: int = 20
-H: int = 20
 
-FPS = 60
+W: int = 80
+H: int = 30
 
-CELL_SIZE = 35
+FPS = 500
+
+CELL_SIZE = 20
 
 WIDTH = W * CELL_SIZE
 HEIGHT = H * CELL_SIZE
 
 BG_COLOR = (15, 15, 15)
 CELL_COLOR = (236, 128, 39)
-CIRCLE = True
-
-class Cell:
-	"""
-	Cell class that holds the information of each cell, including the position
-	"""
-	def __init__(self, x: int, y: int, state: bool = False) -> None:
-		self.x = x
-		self.y = y
-		self.state: bool = state
-
-	def __eq__(self, other: tuple | object) -> bool:
-		if isinstance(other, tuple):
-			return self.astuple == other
-
-		elif isinstance(other, Cell):
-			return ((self.x == other.x) and (self.y == other.y))
-
-
-	def __ne__(self, other: tuple | object) -> bool:
-		if isinstance(other, tuple):
-			return self.astuple != other
-
-		elif isinstance(other, Cell):
-			return ((self.x != other.x) or (self.y != other.y))
-
-
-	@property
-	def astuple(self):
-		return (self.x, self.y)
-
-
-	def __repr__(self) -> str:
-		return str(self.astuple)
-
+CIRCLE = False
 
 
 class GameOfLife:
@@ -57,22 +23,21 @@ class GameOfLife:
 		self.width = width
 		self.height = height
 
-		self.world: list[list[Cell]] = [
-			[Cell(x=x, y=y) for x in range(width)]
-			for y in range(height)
+		self.world: list[list[bool]] = [
+			[False for c in range(self.width)]
+			for r in range(self.height)
 		]
 
 		self.num_alives: list[list[int]] = [[0 for c in range(self.width)] for r in range(self.height)]
-		self.compute_num_alives()
-
+		
 
 	def randomize(self, alive_prob: float = 0.5) -> None:
 		"""
 		This method will randomize self.world, with the alive probabilty of alive_prob: float [0 - 1]
 		"""
 		self.world = [
-			[Cell(x=x, y=y, state=bool(random() < alive_prob)) for x in range(self.width)]
-			for y in range(self.height)
+			[(random() < alive_prob) for c in range(self.width)]
+			for r in range(self.height)
 		]
 
 
@@ -87,11 +52,10 @@ class GameOfLife:
 						# skip over the current cell
 						if (r_n, c_n) == (r, c): continue
 
-						if self.world[r_n%self.height][c_n%self.width].state:
+						if self.world[r_n%self.height][c_n%self.width]:
 							num_alives += 1
 				# now we counted all the alive cells in the neighborhood of the current cell
 				self.num_alives[r][c] = num_alives
-
 
 
 	def evolve(self) -> None:
@@ -104,14 +68,14 @@ class GameOfLife:
 				cell = self.world[r][c]
 				num_alives = self.num_alives[r][c]
 				# it's time to check for the main rules of the game
-				if cell.state and num_alives < 2:
-					cell.state = False
-				elif cell.state and num_alives in (2, 3):
-					cell.state = True
-				elif cell.state and num_alives > 3:
-					cell.state = False
-				elif (not cell.state) and num_alives == 3:
-					cell.state = True
+				if cell and num_alives < 2:
+					self.world[r][c] = False
+				elif cell and num_alives in (2, 3):
+					self.world[r][c] = True
+				elif cell and num_alives > 3:
+					self.world[r][c] = False
+				elif (not cell) and num_alives == 3:
+					self.world[r][c] = True
 
 
 
@@ -126,20 +90,20 @@ class GOL_GAME:
 		self.gol: GameOfLife = GameOfLife(width=WIDTH, height=HEIGHT)
 		self.gol.randomize()
 
-		self.screen.fill(color=BG_COLOR)
+		#self.screen.fill(color=BG_COLOR)
 
 
 	def draw_world(self) -> None:
 		for r in range(self.gol.height):
 			for c in range(self.gol.width):
-				cell: Cell = self.gol.world[r][c]
+				cell: bool = self.gol.world[r][c]
 
 				top = r * CELL_SIZE
 				left = c * CELL_SIZE
 				rect = (left, top, CELL_SIZE, CELL_SIZE)
 
-				color = CELL_COLOR if cell.state else BG_COLOR
-				radius = CELL_SIZE if CIRCLE and cell.state else 0
+				color = CELL_COLOR if cell else BG_COLOR
+				radius = CELL_SIZE if CIRCLE and cell else 0
 				pg.draw.rect(self.screen, rect=rect, color=color, border_radius=radius)
 
 
