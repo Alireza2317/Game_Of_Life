@@ -1,10 +1,10 @@
 import sys
 import pygame as pg
-from random import randint
+from random import random
 from copy import deepcopy
 
-W: int = 20
-H: int = 20
+W: int = 100
+H: int = 80
 
 FPS = 10
 
@@ -61,13 +61,16 @@ class GameOfLife:
 			[Cell(x=x, y=y) for x in range(width)]
 			for y in range(height)
 		]
-	
-	def randomize(self) -> None:
+
+	def randomize(self, alive_prob: float = 0.5) -> None:
+		"""
+		This method will randomize self.world, with the alive probabilty of alive_prob: float [0 - 1]
+		"""
 		self.world = [
-			[Cell(x=x, y=y, state=bool(randint(0, 1))) for x in range(self.width)]
+			[Cell(x=x, y=y, state=bool(random() < alive_prob)) for x in range(self.width)]
 			for y in range(self.height)
 		]
-	
+
 
 	def evolve(self) -> None:
 		pass
@@ -77,6 +80,7 @@ class GameOfLife:
 class GOL_GAME:
 	def __init__(self) -> None:
 		pg.init()
+		pg.display.set_caption('Game of Life')
 		self.screen = pg.display.set_mode((WIDTH, HEIGHT))
 		self.clock = pg.time.Clock()
 		self.fps = FPS
@@ -85,13 +89,18 @@ class GOL_GAME:
 
 
 	def draw_world(self) -> None:
-		for r in self.gol.world:
-			for c in self.gol.world:
+		for r in range(self.gol.height):
+			for c in range(self.gol.width):
+				cell: Cell = self.gol.world[r][c]
+
 				top = r * CELL_SIZE
 				left = c * CELL_SIZE
 				rect = (left, top, CELL_SIZE, CELL_SIZE)
-				radius = CELL_SIZE if CIRCLE else 0
-				pg.draw.rect(self.screen, color=CELL_COLOR, rect=rect, border_radius=radius)
+
+				color = CELL_COLOR if cell.state else BG_COLOR
+				radius = CELL_SIZE if CIRCLE and cell.state else 0
+				pg.draw.rect(self.screen, rect=rect, color=color, border_radius=radius)
+				
 
 
 	def	step(self) -> None:
@@ -102,8 +111,8 @@ class GOL_GAME:
 
 
 		self.gol.evolve()
-		self.draw_world()
 		self.screen.fill(color=BG_COLOR)
+		self.draw_world()
 		pg.display.update()
 		self.clock.tick(self.fps)
 
