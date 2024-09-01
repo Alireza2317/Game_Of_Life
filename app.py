@@ -68,14 +68,14 @@ class GameOfLife:
 				cell = self.world[r][c]
 				num_alives = self.num_alives[r][c]
 				# it's time to check for the main rules of the game
-				if cell and num_alives < 2:
-					self.world[r][c] = False
-				elif cell and num_alives in (2, 3):
-					self.world[r][c] = True
-				elif cell and num_alives > 3:
-					self.world[r][c] = False
-				elif (not cell) and num_alives == 3:
-					self.world[r][c] = True
+				if cell:
+					if num_alives in (2, 3):
+						self.world[r][c] = True
+					else:
+						self.world[r][c] = False
+				else:
+					if num_alives == 3:
+						self.world[r][c] = True
 
 
 
