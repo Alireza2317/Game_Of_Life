@@ -3,12 +3,12 @@ import pygame as pg
 from random import random
 from copy import deepcopy
 
-W: int = 100
-H: int = 80
+W: int = 20
+H: int = 20
 
 FPS = 10
 
-CELL_SIZE = 10
+CELL_SIZE = 35
 
 WIDTH = W * CELL_SIZE
 HEIGHT = H * CELL_SIZE
@@ -62,6 +62,10 @@ class GameOfLife:
 			for y in range(height)
 		]
 
+		self.num_alives: list[list[int]] = [[0 for c in range(self.width)] for r in range(self.height)]
+		self.compute_num_alives()
+
+
 	def randomize(self, alive_prob: float = 0.5) -> None:
 		"""
 		This method will randomize self.world, with the alive probabilty of alive_prob: float [0 - 1]
@@ -72,8 +76,31 @@ class GameOfLife:
 		]
 
 
+	def compute_num_alives(self) -> None:
+		# loop through each cell in the world
+		for r in range(self.height):
+			for c in range(self.width):
+				num_alives: int = 0
+				# loop through the 8 neighbors of this current cell and count the alive cells
+				for r_n in range(r-1, r+1+1):
+					for c_n in range(c-1, c+1+1):
+						# skip over the current cell
+						if (r_n, c_n) == (r, c): continue
+
+						if self.world[r_n%self.height][c_n%self.width].state:
+							num_alives += 1
+				# now we counted all the alive cells in the neighborhood of the current cell
+				self.num_alives[r][c] = num_alives
+
+
+
 	def evolve(self) -> None:
-		pass
+		self.compute_num_alives()
+
+		for r in range(self.height):
+			for c in range(self.width):
+				pass
+
 
 
 
@@ -81,11 +108,14 @@ class GOL_GAME:
 	def __init__(self) -> None:
 		pg.init()
 		pg.display.set_caption('Game of Life')
+
 		self.screen = pg.display.set_mode((WIDTH, HEIGHT))
 		self.clock = pg.time.Clock()
 		self.fps = FPS
 		self.gol: GameOfLife = GameOfLife(width=WIDTH, height=HEIGHT)
 		self.gol.randomize()
+
+		self.screen.fill(color=BG_COLOR)
 
 
 	def draw_world(self) -> None:
@@ -100,7 +130,6 @@ class GOL_GAME:
 				color = CELL_COLOR if cell.state else BG_COLOR
 				radius = CELL_SIZE if CIRCLE and cell.state else 0
 				pg.draw.rect(self.screen, rect=rect, color=color, border_radius=radius)
-				
 
 
 	def	step(self) -> None:
@@ -111,8 +140,9 @@ class GOL_GAME:
 
 
 		self.gol.evolve()
-		self.screen.fill(color=BG_COLOR)
+
 		self.draw_world()
+
 		pg.display.update()
 		self.clock.tick(self.fps)
 
