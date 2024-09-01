@@ -1,10 +1,11 @@
 import sys
 import pygame as pg
 from random import random
+import time
+#import numpy as np
 
-
-W: int = 80
-H: int = 30
+W: int = 320
+H: int = 180
 
 FPS = 500
 
@@ -87,11 +88,11 @@ class GOL_GAME:
 		self.screen = pg.display.set_mode((WIDTH, HEIGHT))
 		self.clock = pg.time.Clock()
 		self.fps = FPS
-		self.gol: GameOfLife = GameOfLife(width=WIDTH, height=HEIGHT)
+		self.gol: GameOfLife = GameOfLife(width=W, height=H)
 		self.gol.randomize()
 
-		#self.screen.fill(color=BG_COLOR)
-
+		self.screen.fill(color=BG_COLOR)
+		pg.display.update()
 
 	def draw_world(self) -> None:
 		for r in range(self.gol.height):
@@ -113,9 +114,8 @@ class GOL_GAME:
 				pg.quit()
 				sys.exit()
 
-
 		self.gol.evolve()
-
+		
 		self.draw_world()
 
 		pg.display.update()
@@ -126,4 +126,7 @@ if __name__ == '__main__':
 	game = GOL_GAME()
 
 	while True:
+		start = time.time()
 		game.step()
+		steptime = time.time() - start
+		print(steptime)
