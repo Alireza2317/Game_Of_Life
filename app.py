@@ -4,8 +4,8 @@ from random import random
 import time
 #import numpy as np
 
-W: int = 320
-H: int = 180
+W: int = 80
+H: int = 30
 
 FPS = 500
 
