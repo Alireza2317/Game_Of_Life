@@ -4,12 +4,12 @@ from random import random
 import time
 #import numpy as np
 
-W: int = 80
-H: int = 30
+W: int = 200
+H: int = 100
 
-FPS = 500
+FPS = 10
 
-CELL_SIZE = 20
+CELL_SIZE = 8
 
 WIDTH = W * CELL_SIZE
 HEIGHT = H * CELL_SIZE
@@ -90,7 +90,7 @@ class GOL_GAME:
 		self.fps = FPS
 		self.gol: GameOfLife = GameOfLife(width=W, height=H)
 		self.gol.randomize()
-
+		self.pause = False
 		self.screen.fill(color=BG_COLOR)
 		pg.display.update()
 
@@ -113,9 +113,20 @@ class GOL_GAME:
 			if event.type == pg.QUIT:
 				pg.quit()
 				sys.exit()
-
-		self.gol.evolve()
+			if event.type == pg.KEYDOWN:
+				if event.key == pg.K_KP_PLUS:
+					self.fps += 1
+				elif event.key == pg.K_KP_MINUS:
+					self.fps = max(0.1, self.fps - 1)
+				if event.key == pg.K_r:
+					self.gol.randomize()
+				if event.key == pg.K_p:
+					self.pause = not self.pause
 		
+		if self.pause: return
+		
+		
+		self.gol.evolve()
 		self.draw_world()
 
 		pg.display.update()
